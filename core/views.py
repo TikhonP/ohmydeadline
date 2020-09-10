@@ -140,4 +140,23 @@ def done_task(request):
         return HttpResponse('Invalid requsest method ({}) Must be GET or POST'.format(request.method))
 
 
+def all_tasks(request):
+    if not request.user.is_authenticated:
+        return redirect('/')
+    if request.method == 'GET':
+        tasks = Deadline.objects.filter(user=request.user).order_by("-date_deadline")
+        nowtime = timezone.now()
 
+        for i in range(len(tasks)):
+            tasks[i].is_timeout = (tasks[i].date_deadline - nowtime).total_seconds() <= 0
+
+        params = {
+            'user': request.user,
+            'tasks': tasks,
+            'len_tasks': len(tasks),
+        }
+
+        return render(request, 'all_tasks.html', params)
+
+    else:
+        return HttpResponse('Invalid requsest method ({}) Must be GET or POST'.format(request.method))

@@ -24,7 +24,7 @@
             <div class="content">
               <div class="header">{{ task.title }}</div>
               <div class="description">
-                {{ task.description }}
+                {{ task.description|linebreaksbr }}
               </div>
             </div>
             <div class="extra content">
@@ -32,9 +32,11 @@
                 <i class="clock icon"></i>
                   {{ task.working_time }} Минут
               </span>
-              <a href="/donedeadline?deadline={{ task.id }}">
-                <button class="ui button right">Done</button> 
-              </a>
+              <span>
+                <a href="/donedeadline?deadline={{ task.id }}">
+                  <button class="mini ui button right">Done</button> 
+                </a>
+              </span>
             </div>
           </div>
 
@@ -42,22 +44,22 @@
         </div>
       </div>
       <div class="column">
-        <h2>Все задачи</h2>
+        <h2>Актуальные задачи</h2>
         {% if len_mydeadlines is 0 %}
         <p>Нету созданных задач</p>
         {% endif %}
         
         <div class="ui link cards">
           {% for i in mydeadlines %}
-          
+          {% if i.done is False and i.is_timeout is False %} 
           <div class="card">
             <div class="content">
               <div class="header">{{ i.title }}</div>
               <div class="meta">
-                <a><b>{% if i.done %}Сделано!{% else %}{% if i.is_timeout %}Провалено(!{% else %}Не начато{% endif %}{% endif %}</b></a>
+                <a><b>Не начато</b></a>
               </div>
               <div class="description">
-                {{ i.description }}
+                {{ i.description|linebreaksbr }}
               </div>
             </div>
             <div class="extra content">
@@ -70,8 +72,11 @@
               </span>
             </div>
           </div>
+          {% endif %}
           {% endfor %}
         </div> 
+        <br>
+        <a href="/all_tasks"><button class="fluid ui button">Все задачи</button></a>
       </div>
     </div>
   </div>
