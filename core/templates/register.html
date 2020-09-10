@@ -1,0 +1,36 @@
+{% extends "base.html" %} 
+
+{% block title %} · Регистрация{%endblock %} 
+
+{% block nav %}
+<a class="item" href="/">Home</a>
+<a class="item" href="/login">Log In</a>
+<a class="active item" href="/register">Sign Up</a>
+{% endblock %}
+
+{% block content %}
+
+<div class="ui vertical stripe segment">
+  <div class="ui container">
+
+    <form action="." method="post" class="ui form {% if messages %}error{% endif %}">
+      {% csrf_token %}
+
+      {% include "form.html" %}
+
+      {% if messages %}
+      
+      {% for message in messages %}
+      <div class="ui error message">
+        <p>{{ message }}</p>
+      </div>
+      {% endfor %}
+
+      {% endif %}
+
+      <button class="ui button" type="submit">Регистрация</button>
+    </form>
+
+  </div>
+</div>
+{% endblock %}

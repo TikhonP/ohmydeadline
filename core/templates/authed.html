@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block nav %}
+<a class="active item" href="/">You logined as {{ user.username }}</a>
+<a class="item" href="/logout/">Logout</a>
+<a class="item" href="/adddeadline/">Add Deadline</a>
+{% endblock %}
+
+{% block content %}
+<div class="ui vertical stripe segment">
+  <div class="ui equal width stackable internally celled grid">
+    <div class="center aligned row">
+      <div class="column">
+        <h2>Задачи на завтра</h2>
+
+        {% if len_deadlines_for_tomorrow is 0 %}
+        <p>Нет задач на завтра</p>
+        {% endif %}
+
+        <div class="ui link cards">
+          {% for task in deadlines_for_tomorrow %}
+
+          <div class="card">
+            <div class="content">
+              <div class="header">{{ task.title }}</div>
+              <div class="description">
+                {{ task.description }}
+              </div>
+            </div>
+            <div class="extra content">
+              <span>
+                <i class="clock icon"></i>
+                  {{ task.working_time }} Минут
+              </span>
+              <a href="/donedeadline?deadline={{ task.id }}">
+                <button class="ui button right">Done</button> 
+              </a>
+            </div>
+          </div>
+
+          {% endfor %}
+        </div>
+      </div>
+      <div class="column">
+        <h2>Все задачи</h2>
+        {% if len_mydeadlines is 0 %}
+        <p>Нету созданных задач</p>
+        {% endif %}
+        
+        <div class="ui link cards">
+          {% for i in mydeadlines %}
+          
+          <div class="card">
+            <div class="content">
+              <div class="header">{{ i.title }}</div>
+              <div class="meta">
+                <a><b>{% if i.done %}Сделано!{% else %}{% if i.is_timeout %}Провалено(!{% else %}Не начато{% endif %}{% endif %}</b></a>
+              </div>
+              <div class="description">
+                {{ i.description }}
+              </div>
+            </div>
+            <div class="extra content">
+              <span class="right floated">
+                {{ i.date_deadline }}
+              </span>
+              <span>
+                <i class="clock icon"></i>
+                  {{ i.working_time }} Минут
+              </span>
+            </div>
+          </div>
+          {% endfor %}
+        </div> 
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

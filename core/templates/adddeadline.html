@@ -1,0 +1,36 @@
+{% extends "base.html" %} 
+
+{% block title %} · Аунтификация{% endblock %} 
+
+{% block nav %}
+<a class="item" href="/">You logined as {{ user.username }}</a>
+<a class="item" href="/logout/">Logout</a>
+<a class="active item" href="/adddeadline/">Add Deadline</a>
+{% endblock %}
+
+{% block content %}
+
+<div class="ui vertical stripe segment">
+  <div class="ui container">
+
+    <form action="." method="post" class="ui form {% if messages %}error{% endif %}">
+      {% csrf_token %}
+
+      {% include "form.html" %}
+
+      {% if messages %}
+      
+      {% for message in messages %}
+      <div class="ui error message">
+        <p>{{ message }}</p>
+      </div>
+      {% endfor %}
+
+      {% endif %}
+
+      <button class="ui button" type="submit">Add</button>
+    </form>
+
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,51 @@
+<!doctype html>
+
+{% load static %}
+
+<html lang="ru">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <title>OhMyDeadline{% block title %}{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0">
+  <meta name="description" content="The Deadline planner">
+  <meta name="author" content="Tikhon Petrishchev">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.css">
+  
+  {% block style %}
+  {% endblock %}
+</head>
+
+<body>
+  {% block firstcontent %}
+  {% endblock %}
+
+  <div class="ui inverted vertical masthead center aligned segment">
+    <div class="ui container">
+      <div class="ui large secondary inverted pointing menu">
+        {% block nav %}
+        {% endblock %}
+      </div>
+    </div>
+
+    {% block navtitle %}
+    {% endblock %}
+  </div>
+
+  {% block content %}
+  {% endblock %}
+
+  <div class="ui inverted vertical footer segment">
+    <div class="ui container">
+      <h4 class="ui inverted header">&copy; Tikhon Petrishchev 2020</h4>
+  </div>
+  </div>
+
+  <script src="assets/library/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.js"></script>
+  {% block scripts %}
+  {% endblock %}
+</body>
+</html>
