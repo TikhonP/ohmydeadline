@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
-from core.models import Deadline
+from core.models import Deadline, Tip
 
 
 class LoginForm(forms.Form):
@@ -25,3 +25,9 @@ class DeadlineForm(forms.ModelForm):
     class Meta:
         model = Deadline
         fields = ('date_deadline', 'working_time', 'description')
+
+
+class TipForm(forms.ModelForm):
+    class Meta:
+        model = Tip
+        fields = ('text', )

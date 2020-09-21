@@ -1,13 +1,26 @@
-{% extends 'base.html' %}
+{% extends 'base.html' %} {% block nav %}
 
-{% block nav %}
 <a class="active item" href="/">You logined as {{ user.username }}</a>
 <a class="item" href="/logout/">Logout</a>
 <a class="item" href="/adddeadline/">Add Deadline</a>
-{% endblock %}
+<a class="item" href="/addtip/">Add Tip</a>
 
-{% block content %}
+{% endblock %} {% block content %}
 <div class="ui vertical stripe segment">
+  <div class="ui text container">
+    {% for tip in tips %}
+    <div class="ui message">
+      <form method="post" action="/unpin/">
+        {% csrf_token %}
+        <input type="hidden" name="id" value="{{ tip.id }}" />
+        <button class="ui button close icon" type="submit"><i class="close icon"></i></button>
+      </form>
+
+      <p>{{ tip.text }}</p>
+    </div>
+    {% endfor %}
+  </div>
+  <br>
   <div class="ui equal width stackable internally celled grid">
     <div class="center aligned row">
       <div class="column">
@@ -30,11 +43,11 @@
             <div class="extra content">
               <span>
                 <i class="clock icon"></i>
-                  {{ task.working_time }} Минут
+                {{ task.working_time }} Минут
               </span>
               <span>
                 <a href="/donedeadline?deadline={{ task.id }}">
-                  <button class="mini ui button right">Done</button> 
+                  <button class="mini ui button right">Done</button>
                 </a>
               </span>
             </div>
@@ -48,10 +61,11 @@
         {% if len_mydeadlines is 0 %}
         <p>Нету созданных задач</p>
         {% endif %}
-        
+
         <div class="ui link cards">
           {% for i in mydeadlines %}
-          {% if i.done is False and i.is_timeout is False %} 
+          <div />
+          {% if i.done is False and i.is_timeout is False %}
           <div class="card">
             <div class="content">
               <div class="header">{{ i.title }}</div>
@@ -68,15 +82,16 @@
               </span>
               <span>
                 <i class="clock icon"></i>
-                  {{ i.working_time }} Минут
+                {{ i.working_time }} Минут
               </span>
             </div>
           </div>
-          {% endif %}
-          {% endfor %}
-        </div> 
-        <br>
-        <a href="/all_tasks"><button class="fluid ui button">Все задачи</button></a>
+          {% endif %} {% endfor %}
+        </div>
+        <br />
+        <a href="/all_tasks"
+          ><button class="fluid ui button">Все задачи</button></a
+        >
       </div>
     </div>
   </div>

@@ -1,6 +1,5 @@
 from django.contrib import admin
-from core.models import Deadline
+from core.models import Deadline, Tip
 
 admin.site.register(Deadline)
-
-# Register your models here.
+admin.site.register(Tip)

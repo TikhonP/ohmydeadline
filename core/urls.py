@@ -10,4 +10,6 @@ urlpatterns = [
     path('adddeadline/', views.adddeadline, name='adddeadline'),
     path('donedeadline/', views.done_task, name='donedeadline'),
     path('all_tasks/', views.all_tasks, name='all_tasks'),
+    path('unpin/', views.unpin_tip, name='unpin'),
+    path('addtip/', views.add_tip, name='add_tip'),
 ]

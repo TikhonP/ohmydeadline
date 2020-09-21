@@ -2,8 +2,8 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.http import HttpResponse
 from django.contrib.auth import authenticate, login, logout
-from .forms import LoginForm, RegisterForm, DeadlineForm
-from core.models import Deadline
+from .forms import LoginForm, RegisterForm, DeadlineForm, TipForm
+from core.models import Deadline, Tip
 from django.utils import timezone
 import datetime
 
@@ -79,6 +79,8 @@ def authed(request):
             user=request.user, done=False, date_deadline=(nowtime + datetime.timedelta(days=1)).date(),
         ).order_by("date_deadline")
 
+        tips = Tip.objects.filter(user=request.user, is_active=True)
+
         params = {
             'user': request.user,
             'mydeadlines': mydeadlines,
@@ -86,6 +88,7 @@ def authed(request):
             'nowtime': nowtime,
             'deadlines_for_tomorrow': deadlines_for_tomorrow,
             'len_deadlines_for_tomorrow': len(deadlines_for_tomorrow),
+            'tips': tips,
         }
 
         return render(request, 'authed.html', params)
@@ -160,3 +163,43 @@ def all_tasks(request):
 
     else:
         return HttpResponse('Invalid requsest method ({}) Must be GET or POST'.format(request.method))
+
+
+def unpin_tip(request):
+    if not request.user.is_authenticated:
+        return redirect('/')
+    if request.method == 'POST':
+        tip_id = request.POST.get('id', None)
+
+        tip = Tip.objects.get(id=tip_id)
+
+        print(tip.user, request.user)
+
+        if tip.user != request.user:
+            return HttpResponse('Hey hacker, it is not your tip!')
+
+        tip.is_active = False
+        tip.save()
+
+        return redirect('/')
+
+    else:
+        return HttpResponse('Invalid requsest method ({}) Must be POST'.format(request.method))
+
+def add_tip(request):
+    if not request.user.is_authenticated:
+        return redirect('/')
+    if request.method == 'POST':
+        form = TipForm(request.POST)
+        if form.is_valid():
+            tip = form.save(commit=False)
+            tip.user = request.user
+            tip.save()
+            return redirect('/')
+    elif request.method == 'GET':
+        form = TipForm()
+    else:
+        return HttpResponse('Invalid requsest method ({}) Must be GET or POST'.format(request.method))
+    return render(request, 'addtip.html', {'form': form})
+
+
