@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %} · Профиль{% endblock %}
+
+{% block nav %}
+<a class="item" href="/">You logined as {{ user.username }}</a>
+<a class="item" href="/adddeadline/">Add Deadline</a>
+<a class="item" href="/addtip/">Add Tip</a>
+<a class="active item" href="/profile/">Profile</a>
+<a class="item" href="/logout/">Logout</a>
+{% endblock %}
+
+{% block content %}
+
+<div class="ui vertical stripe segment">
+  <div class="ui container">
+    <form
+      action="."
+      method="post"
+      class="ui form {% if messages %}error{% endif %}"
+    >
+      {% csrf_token %}
+      {% include "form.html" %}
+      {% if messages %}
+
+      {% for message in messages %}
+      <div class="ui error message">
+        <p>{{ message }}</p>
+      </div>
+      {% endfor %}
+      {% endif %}
+
+      <button class="ui button" type="submit">Update</button>
+    </form>
+  </div>
+</div>
+
+<div class="ui vertical stripe segment">
+  <div class="ui text container">
+    <h3 class="ui header">Сторонние сервисы</h3>
+    <h4 class="ui top attached block header">
+    Телеграмм
+  </h4>
+  <div class="ui bottom attached segment">
+    {% if telegram %}
+    <p><b>✅ Подключен (@{{ telegram_username }})</b></p>
+      <a href="https://telegram.me/{{ bot_name }}"><button class="ui primary button">Перейти в бота</button></a>
+      <a href="delete_telegram?id={{ user.id }}"><button class="ui button">Отвязать аккаунт</button></a>
+    {% else %}
+    <p><b>❌ Не подключен</b></p>
+      <a class="ui button" href="https://telegram.me/{{ bot_name }}?start={{ telegram_hash }}">
+        Подключить
+      </a>
+    {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

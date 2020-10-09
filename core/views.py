@@ -2,10 +2,13 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.http import HttpResponse
 from django.contrib.auth import authenticate, login, logout
-from .forms import LoginForm, RegisterForm, DeadlineForm, TipForm
+from .forms import LoginForm, RegisterForm, DeadlineForm, TipForm, UserForm
 from core.models import Deadline, Tip
 from django.utils import timezone
 import datetime
+from secrets import token_hex
+from django.conf import settings
+from django.contrib.auth.models import User
 
 
 def main_page(request):
@@ -201,5 +204,52 @@ def add_tip(request):
     else:
         return HttpResponse('Invalid requsest method ({}) Must be GET or POST'.format(request.method))
     return render(request, 'addtip.html', {'form': form})
+
+
+def profilep(request):
+    if not request.user.is_authenticated:
+        return redirect('/')
+    if request.method == 'POST':
+        form = UserForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            return redirect('/profile/')
+    elif request.method == 'GET':
+        form = UserForm(instance=request.user)
+    else:
+        return HttpResponse('Invalid requsest method ({}) Must be GET or POST'.format(request.method))
+
+    params = {'form': form, 'bot_name': settings.BOT_NAME}
+
+
+    if request.user.profile.is_telegram_connected:
+        params['telegram'] = True
+        params['telegram_username'] = request.user.profile.telegram_username
+        params['user'] = request.user
+    else:
+        params['telegram'] = False
+        request.user.profile.telegram_hash = token_hex(20)
+        request.user.profile.save()
+        params['telegram_hash'] = request.user.profile.telegram_hash
+
+    return render(request, 'profile.html', params)
+
+
+def unpin_telegram(request):
+    if not request.user.is_authenticated:
+        return redirect('/')
+
+    if request.method == 'GET':
+        user_id = request.GET.get('id', None)
+        user = User.objects.get(id=user_id)
+
+        p = user.profile
+        p.is_telegram_connected = False
+        p.save()
+
+        return redirect('/profile')
+
+    else:
+        return HttpResponse('Invalid requsest method ({}) Must be GET'.format(request.method))
 
 

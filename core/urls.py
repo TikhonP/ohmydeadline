@@ -12,4 +12,6 @@ urlpatterns = [
     path('all_tasks/', views.all_tasks, name='all_tasks'),
     path('unpin/', views.unpin_tip, name='unpin'),
     path('addtip/', views.add_tip, name='add_tip'),
+    path('profile/', views.profilep, name='profile'),
+    path('profile/delete_telegram/', views.unpin_telegram, name='delete_telegram'),
 ]

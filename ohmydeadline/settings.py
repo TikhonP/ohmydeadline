@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'core',
+    'telegram_bot',
 ]
 
 MIDDLEWARE = [
@@ -131,3 +132,9 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
 # DATA_UPLOAD_MAX_MEMORY_SIZE = 31457280
+
+
+# Bot Settings
+
+BOT_TOKEN = ""
+BOT_NAME = ""
