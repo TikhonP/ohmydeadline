@@ -12,8 +12,8 @@
   <meta name="description" content="The Deadline planner">
   <meta name="author" content="Tikhon Petrishchev">
 
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.css">
-  
+  <link rel="stylesheet" href="{% static 'css/semantic.min.css' %}">
+
   {% block style %}
   {% endblock %}
 </head>
@@ -43,8 +43,8 @@
   </div>
   </div>
 
-  <script src="assets/library/jquery.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.js"></script>
+  <script src="{% static 'js/jquery.min.js' %}"></script>
+  <script src="{% static 'js/semantic.min.js' %}"></script>
   {% block scripts %}
   {% endblock %}
 </body>
