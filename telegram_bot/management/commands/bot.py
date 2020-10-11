@@ -12,6 +12,9 @@ from django.contrib.auth.models import User
 
 import datetime
 from django.utils import timezone
+import threading
+import time
+
 
 def extract_unique_code(text):
     # Extracts the unique_code from the sent /start command.
@@ -33,6 +36,8 @@ def start(update, context):
 - Показать список задач на завтра /tomorrow_tasks
 - Показать список всех активных задач /all_active_tasks
 - Отвязать аккаунт /logout
+
+Каждые 24 часа бот будет присылать тебе список задач на завтра.
                     """.format(profile.user.first_name)
         else:
             reply = "Какая-то ошибка, я не знаю кто ты..."
@@ -116,6 +121,34 @@ def logout(update, context):
     context.bot.send_message(chat_id=update.effective_chat.id, text=reply)
 
 
+def send_tasks(bot):
+    while True:
+        p = Profile.objects.filter(is_telegram_connected=True)
+
+        nowtime = timezone.now()
+
+        for u in p:
+            deadlines_for_tomorrow = Deadline.objects.filter(
+                    user=u.user,
+                    done=False,
+                    date_deadline=(nowtime + datetime.timedelta(days=1)).date(),
+                ).order_by("date_deadline")
+            if len(deadlines_for_tomorrow) > 0:
+                reply = "Доброе утро!\n\n*Твои задачи на завтра*:\n\n"
+                for deadline in deadlines_for_tomorrow:
+                    d = "*-* __{}__{}\nДедлайн - {}\n\n".format(
+                        deadline.title,
+                        '\n'+deadline.description if deadline.description != '' else '',
+                        deadline.date_deadline.strftime('%d.%m.%Y'),
+                    )
+                    reply += d
+            else:
+                reply = "У тебя нет задач на завтра!\n\nПланируй быстрее!"
+
+            bot.send_message(chat_id=u.telegram_id, text=reply,
+                             parse_mode=telegram.ParseMode.MARKDOWN)
+
+        time.sleep(60)
 
 
 class Command(BaseCommand):
@@ -148,5 +181,8 @@ class Command(BaseCommand):
 
         logout_handler = CommandHandler('logout', logout)
         dispatcher.add_handler(logout_handler)
+
+        t = threading.Thread(target=send_tasks, args=(bot, ))
+        t.start()
 
         updater.start_polling()
