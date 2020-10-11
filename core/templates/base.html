@@ -37,18 +37,48 @@
 
   <!-- Windows 8.1 + IE11 and above -->
   <meta name="msapplication-config" content="{% static 'favicons/browserconfig.xml' %}" />
-
   {% block style %}
   {% endblock %}
+  <style type="text/css">
+  .secondary.pointing.menu .toc.item {
+      display: none;
+    }
+
+  @media only screen and (max-width: 700px) {
+  .ui.fixed.menu {
+    display: none !important;
+  }
+  .secondary.pointing.menu .item,
+  .secondary.pointing.menu .menu {
+    display: none;
+  }
+  .secondary.pointing.menu .toc.item {
+    display: block;
+  }
+}
+  </style>
+
 </head>
 
 <body>
   {% block firstcontent %}
   {% endblock %}
 
-  <div class="ui inverted vertical masthead center aligned segment">
+
+  <div class="ui vertical inverted sidebar menu">
+    {% block nav_ver %}
+    {% endblock %}
+  </div>
+
+
+
+  <div class="pusher">
+    <div class="ui inverted vertical masthead center aligned segment">
     <div class="ui container">
       <div class="ui large secondary inverted pointing menu">
+        <a class="toc item">
+          <i class="sidebar icon"></i>
+        </a>
         {% block nav %}
         {% endblock %}
       </div>
@@ -57,8 +87,6 @@
     {% block navtitle %}
     {% endblock %}
   </div>
-
-  <div class="pusher">
     {% block content %}
     {% endblock %}
   </div>
@@ -71,6 +99,16 @@
 
   <script src="{% static 'js/jquery.min.js' %}"></script>
   <script src="{% static 'js/semantic.min.js' %}"></script>
+  <script>
+    $(document)
+      .ready(function() {
+        $('.ui.sidebar')
+          .sidebar('attach events', '.toc.item')
+        ;
+
+      })
+    ;
+    </script>
   {% block scripts %}
   {% endblock %}
 </body>

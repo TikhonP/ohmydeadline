@@ -2,6 +2,14 @@
 
 {% block title %} · Профиль{% endblock %}
 
+{% block nav_ver %}
+<a class="item" href="/">Главная ({{ user.first_name }})</a>
+<a class="item" href="/adddeadline/">Добавить дедлайн</a>
+<a class="item" href="/addtip/">Добавить заметку</a>
+<a class="active item" href="/profile/">Профиль</a>
+<a class="item" href="/logout/">Выйти</a>
+{% endblock %}
+
 {% block nav %}
 <a class="item" href="/"><i class="home icon"></i> {{ user.first_name }}</a>
 <a class="item" href="/adddeadline/">Добавить дедлайн</a>
@@ -44,8 +52,11 @@
   <div class="ui bottom attached segment">
     {% if telegram %}
     <p><b>✅ Подключен (@{{ telegram_username }})</b></p>
+
+    <div class="ui container">
       <a href="https://telegram.me/{{ bot_name }}"><button class="ui primary button">Перейти в бота</button></a>
       <a href="delete_telegram?id={{ user.id }}"><button class="ui button">Отвязать аккаунт</button></a>
+    </div>
     {% else %}
     <p><b>❌ Не подключен</b></p>
       <a class="ui button" href="https://telegram.me/{{ bot_name }}?start={{ telegram_hash }}">
