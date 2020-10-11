@@ -24,17 +24,17 @@ def save_user_profile(sender, instance, **kwargs):
 
 
 class Deadline(models.Model):
-    title = models.CharField(max_length=255)
-    date_created = models.DateTimeField(('date_created'), default=timezone.now)
-    date_deadline = models.DateTimeField(('Date'))
-    working_time = models.IntegerField()
-    description = models.TextField()
+    title = models.CharField(verbose_name='Название', max_length=255)
+    date_created = models.DateTimeField(verbose_name='Дата создания', default=timezone.now)
+    date_deadline = models.DateTimeField(verbose_name='Дата дедлайна')
+    working_time = models.IntegerField(verbose_name='Время выполнения')
+    description = models.TextField(verbose_name='Описание')
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     done = models.BooleanField(default=False)
 
 
 class Tip(models.Model):
-    text = models.CharField(max_length=500)
+    text = models.CharField(verbose_name='Содержание заметки', max_length=500)
     date_created = models.DateTimeField(('date_created'), default=timezone.now)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     is_active = models.BooleanField(default=True)

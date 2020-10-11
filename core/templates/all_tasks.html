@@ -1,8 +1,16 @@
-{% extends 'base.html' %} {% block nav %}
-<a class="item" href="/">You logined as {{ user.username }}</a>
-<a class="item" href="/logout/">Logout</a>
-<a class="item" href="/adddeadline/">Add Deadline</a>
-{% endblock %} {% block content %}
+{% extends 'base.html' %}
+
+{% block title %} · Все задачи{% endblock %}
+
+{% block nav %}
+<a class="item" href="/"><i class="home icon"></i> {{ user.first_name }}</a>
+<a class="item" href="/adddeadline/">Добавить дедлайн</a>
+<a class="item" href="/addtip/">Добавить заметку</a>
+<a class="item" href="/profile/">Профиль</a>
+<a class="item" href="/logout/">Выйти</a>
+{% endblock %}
+
+{% block content %}
 <div class="ui vertical stripe segment">
   <div class="ui container">
     <h1>Все задачи</h1>
@@ -13,7 +21,7 @@
 
     <div class="ui link cards">
       {% for i in tasks  %}
-      
+
       <div class="card">
         <div class="content">
           <div class="header">{{ i.title }}</div>
@@ -35,7 +43,7 @@
         </div>
       </div>
       {% endfor %}
-    </div> 
+    </div>
   </div>
 </div>
 {% endblock %}

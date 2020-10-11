@@ -27,30 +27,30 @@ def start(update, context):
             profile.telegram_id = update.message.from_user.id
             profile.telegram_username = update.message.from_user.username
             profile.save()
-            reply = """Hello {}, how are you?
+            reply = """Привет {}, как ты?
 
-There are commands you can use:
-- Show list of tasks for tomorrow /tomorrow_tasks
-- Show list of all active tasks   /all_active_tasks
-- Log out from this bot           /logout
+Вот команды, которые ты можешь использовать:
+- Показать список задач на завтра /tomorrow_tasks
+- Показать список всех активных задач /all_active_tasks
+- Отвязать аккаунт /logout
                     """.format(profile.user.first_name)
         else:
-            reply = "I have no clue who you are..."
+            reply = "Какая-то ошибка, я не знаю кто ты..."
     else:
         if len(Profile.objects.filter(
             telegram_id=update.message.from_user.id,
             is_telegram_connected=True
         )) != 0:
-            reply = "You are already connected"
+            reply = "Ты уже подключен!"
         else:
-            reply = "Please visit me via a provided URL from the website."
+            reply = "Пожалуйста, залогинься через ссылку на сайте."
     context.bot.send_message(chat_id=update.effective_chat.id, text=reply)
 
 
 def showlist_for_tomorrow(update, context):
     user = Profile.objects.get(telegram_id=update.message.from_user.id).user if len(Profile.objects.filter(telegram_id=update.message.from_user.id, is_telegram_connected=True))!=0 else None
     if user is None:
-        reply = "You are not authed. Please visit me via a provided URL from the website."
+        reply = "Пожалуйста, залогинься через ссылку на сайте."
     else:
         nowtime = timezone.now()
 
@@ -60,7 +60,7 @@ def showlist_for_tomorrow(update, context):
                 date_deadline=(nowtime + datetime.timedelta(days=1)).date(),
             ).order_by("date_deadline")
         if len(deadlines_for_tomorrow) > 0:
-            reply = "*Your tasks for tomorrow*:\n\n"
+            reply = "*Твои задачи на завтра*:\n\n"
             for deadline in deadlines_for_tomorrow:
                 d = "*-* __{}__{}\nДедлайн - {}\n\n".format(
                     deadline.title,
@@ -69,7 +69,7 @@ def showlist_for_tomorrow(update, context):
                 )
                 reply += d
         else:
-            reply = "You have not got any tasks for tomorrow"
+            reply = "У тебя нет задач на завтра!"
 
     context.bot.send_message(chat_id=update.effective_chat.id, text=reply,
                              parse_mode=telegram.ParseMode.MARKDOWN)
@@ -78,14 +78,14 @@ def showlist_for_tomorrow(update, context):
 def showlist_of_all_active_tasks(update, context):
     user = Profile.objects.get(telegram_id=update.message.from_user.id).user if len(Profile.objects.filter(telegram_id=update.message.from_user.id, is_telegram_connected=True))!=0 else None
     if user is None:
-        reply = "You are not authed. Please visit me via a provided URL from the website."
+        reply = "Пожалуйста, залогинься через ссылку на сайте."
     else:
         mydeadlines = Deadline.objects.filter(user=user).order_by("-date_deadline")
 
         if len(mydeadlines) > 0:
             nowtime = timezone.now()
 
-            reply = "*Your active tasks*:\n\n"
+            reply = "*Твои невыполненные задачи*:\n\n"
             for deadline in mydeadlines:
                 if (deadline.date_deadline - nowtime).total_seconds() >= 0:
                     d = "*-* __{}__{}\nДедлайн - {}\n\n".format(
@@ -96,7 +96,7 @@ def showlist_of_all_active_tasks(update, context):
                     reply += d
 
         else:
-            reply = "You have not got any acitve tasks"
+            reply = "У тебя нет грядущих задач"
 
     context.bot.send_message(chat_id=update.effective_chat.id, text=reply,
                              parse_mode=telegram.ParseMode.MARKDOWN)
@@ -106,12 +106,12 @@ def showlist_of_all_active_tasks(update, context):
 def logout(update, context):
     user = Profile.objects.get(telegram_id=update.message.from_user.id).user if len(Profile.objects.filter(telegram_id=update.message.from_user.id, is_telegram_connected=True))!=0 else None
     if user is None:
-        reply = "You are not authed. Please visit me via a provided URL from the website."
+        reply = "Пожалуйста, залогинься через ссылку на сайте."
     else:
         p = user.profile
         p.is_telegram_connected  = False
         p.save()
-        reply = "You are logged out."
+        reply = "Аккаунт отвязан."
 
     context.bot.send_message(chat_id=update.effective_chat.id, text=reply)
 

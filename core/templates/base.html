@@ -14,6 +14,30 @@
 
   <link rel="stylesheet" href="{% static 'css/semantic.min.css' %}">
 
+  <!-- generics -->
+  <link rel="icon" href="{% static 'favicons/favicon32.png' %}" sizes="32x32">
+  <link rel="icon" href="{% static 'favicons/favicon57.png' %}" sizes="57x57">
+  <link rel="icon" href="{% static 'favicons/favicon76.png' %}" sizes="76x76">
+  <link rel="icon" href="{% static 'favicons/favicon96.png' %}" sizes="96x96">
+  <link rel="icon" href="{% static 'favicons/favicon128.png' %}" sizes="128x128">
+  <link rel="icon" href="{% static 'favicons/favicon192.png' %}" sizes="192x192">
+  <link rel="icon" href="{% static 'favicons/favicon228.png' %}" sizes="228x228">
+
+  <!-- Android -->
+  <link rel="shortcut icon" sizes="196x196" href="{% static 'favicons/favicon196.png' %}">
+
+  <!-- iOS -->
+  <link rel="apple-touch-icon" href="{% static 'favicons/favicon120.png' %}" sizes="120x120">
+  <link rel="apple-touch-icon" href="{% static 'favicons/favicon152.png' %}" sizes="152x152">
+  <link rel="apple-touch-icon" href="{% static 'favicons/favicon180.png' %}" sizes="180x180">
+
+  <!-- Windows 8 IE 10-->
+  <meta name="msapplication-TileColor" content="#4855D4">
+  <meta name="msapplication-TileImage" content="{% static 'favicons/favicon144.png' %}">
+
+  <!-- Windows 8.1 + IE11 and above -->
+  <meta name="msapplication-config" content="{% static 'favicons/browserconfig.xml' %}" />
+
   {% block style %}
   {% endblock %}
 </head>
@@ -34,8 +58,10 @@
     {% endblock %}
   </div>
 
-  {% block content %}
-  {% endblock %}
+  <div class="pusher">
+    {% block content %}
+    {% endblock %}
+  </div>
 
   <div class="ui inverted vertical footer segment">
     <div class="ui container">

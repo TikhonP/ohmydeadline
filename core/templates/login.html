@@ -1,11 +1,13 @@
 {% extends "base.html" %}
 
+{% load static %}
+
 {% block title %} · Аунтификация{% endblock %}
 
 {% block nav %}
-<a class="item" href="/">Home</a>
-<a class="active item" href="/login">Log In</a>
-<a class="item" href="/register">Sign Up</a>
+<a class="item" href="/"><i class="home icon"></i></a>
+<a class="active item" href="/login">Войти</a>
+<a class="item" href="/register">Зарегистрироваться</a>
 {% endblock %}
 
 {% block content %}
@@ -19,7 +21,7 @@
       {% include "form.html" %}
 
       {% if messages %}
-      
+
       {% for message in messages %}
       <div class="ui error message">
         <p>{{ message }}</p>
@@ -32,6 +34,6 @@
     </form>
 
   </div>
+  <img class="centered large ui image" src="{% static 'pictures/notes_2.png' %}">
 </div>
 {% endblock %}
-

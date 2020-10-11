@@ -1,13 +1,15 @@
-{% extends "base.html" %} 
+{% extends "base.html" %}
 
-{% block title %} · Аунтификация{% endblock %} 
+{% load static %}
+
+{% block title %} · Добавить заметку{% endblock %}
 
 {% block nav %}
-<a class="item" href="/">You logined as {{ user.username }}</a>
-<a class="item" href="/adddeadline/">Add Deadline</a>
-<a class="active item" href="/addtip/">Add Tip</a>
-<a class="item" href="/profile/">Profile</a>
-<a class="item" href="/logout/">Logout</a>
+<a class="item" href="/"><i class="home icon"></i> {{ user.first_name }}</a>
+<a class="item" href="/adddeadline/">Добавить дедлайн</a>
+<a class="active item" href="/addtip/">Добавить заметку</a>
+<a class="item" href="/profile/">Профиль</a>
+<a class="item" href="/logout/">Выйти</a>
 {% endblock %}
 
 {% block content %}
@@ -21,7 +23,7 @@
       {% include "form.html" %}
 
       {% if messages %}
-      
+
       {% for message in messages %}
       <div class="ui error message">
         <p>{{ message }}</p>
@@ -30,9 +32,10 @@
 
       {% endif %}
 
-      <button class="ui button" type="submit">Add</button>
+      <button class="ui button" type="submit">Добавить</button>
     </form>
 
   </div>
+  <img class="centered large ui image" src="{% static 'pictures/notes_2.png' %}">
 </div>
 {% endblock %}

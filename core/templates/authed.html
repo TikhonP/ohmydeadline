@@ -1,11 +1,14 @@
-{% extends 'base.html' %} {% block nav %}
+{% extends 'base.html' %}
 
-<a class="active item" href="/">You logined as {{ user.username }}</a>
-<a class="item" href="/adddeadline/">Add Deadline</a>
-<a class="item" href="/addtip/">Add Tip</a>
-<a class="item" href="/profile/">Profile</a>
-<a class="item" href="/logout/">Logout</a>
-{% endblock %} {% block content %}
+{% block nav %}
+<a class="active item" href="/"><i class="home icon"></i> {{ user.first_name }}</a>
+<a class="item" href="/adddeadline/">Добавить дедлайн</a>
+<a class="item" href="/addtip/">Добавить заметку</a>
+<a class="item" href="/profile/">Профиль</a>
+<a class="item" href="/logout/">Выйти</a>
+{% endblock %}
+
+{% block content %}
 <div class="ui vertical stripe segment">
   <div class="ui text container">
     {% for tip in tips %}
@@ -47,7 +50,7 @@
               </span>
               <span>
                 <a href="/donedeadline?deadline={{ task.id }}">
-                  <button class="mini ui button right">Done</button>
+                  <button class="mini ui button right">Сделано</button>
                 </a>
               </span>
             </div>
