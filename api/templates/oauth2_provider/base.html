@@ -37,7 +37,7 @@
 
   <!-- Windows 8.1 + IE11 and above -->
   <meta name="msapplication-config" content="{% static 'favicons/browserconfig.xml' %}" />
-  {% block style %}
+  {% block css %}
   {% endblock %}
   <style type="text/css">
   .secondary.pointing.menu .toc.item {
@@ -93,19 +93,7 @@
 
   <div class="ui inverted vertical footer segment">
     <div class="ui container">
-      <div class="ui stackable invertedx equal height stackable grid">
-        <div class="three wide column">
-          <h5 class="ui inverted header">&copy; Tikhon Petrishchev 2020</h5>
-        </div>
-        <div class="two wide column">
-          <div class="item">
-          <a target="_blank" rel="noopener noreferrer" href="https://t.me/tikhonnnnn"><i class="telegram icon"></i></a>
-          <a target="_blank" rel="noopener noreferrer" href="https://vk.com/tikhonnnnnn"><i class="vk icon"></i></a>
-          <a target="_blank" rel="noopener noreferrer" href="https://www.instagram.com/tikhonnnnn"><i class="instagram icon"></i></a>
-        </div>
-        </div>
-        {% block footer %}{% endblock %}
-      </div>
+      <h4 class="ui inverted header">&copy; Tikhon Petrishchev 2020</h4>
   </div>
   </div>
 

@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 from core.models import Deadline, Tip
+from django.utils.safestring import mark_safe
 
 
 class LoginForm(forms.Form):
@@ -15,10 +16,13 @@ class RegisterForm(forms.ModelForm):
     email = forms.CharField(label="Адрес электронной почты", widget=forms.EmailInput(attrs={'placeholder': 'vasa1999@instpiper.com',  "class": "form-control" }))
     username = forms.CharField(label="Имя пользователя", help_text="Обязательное поле. Не более 150 символов. Только буквы, цифры и символы @/./+/-/_.", widget=forms.TextInput(attrs={'placeholder': 'vasek228',  "class": "form-control" }))
     password=forms.CharField(max_length=20, label="Придумайте Пароль", help_text="Ваш пароль должен быть длиной 8-20 символов, содержать буквы и цифры, а также не должен содержать пробелов и эмодзи.", widget=forms.PasswordInput(attrs={'placeholder': '123321', "class": "form-control" }), validators=[validate_password])
+
     class Meta():
         model = User
         fields = ('first_name', 'last_name', 'email', 'username', 'password')
     password1 = forms.CharField(max_length=20, label="Введите пароль ещё раз",  widget=forms.PasswordInput(attrs={'placeholder': '123321', "class": "form-control" }))
+    privacy = forms.BooleanField(initial=False, required=True, label="Политика конфиденциальности", help_text=mark_safe("Я согласен с <a href='/privacy/'>политикой конфиденциальности.</a>"))
+
 
 
 class DeadlineForm(forms.ModelForm):

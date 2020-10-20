@@ -6,7 +6,7 @@ from django.db.models.signals import post_save
 
 
 class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, unique=True)
     is_telegram_connected = models.BooleanField(default=False)
     telegram_hash = models.CharField(max_length=40, unique=True, null=True, default=None)
     telegram_id = models.CharField(max_length=64, null=True, default=None)
@@ -31,6 +31,14 @@ class Deadline(models.Model):
     description = models.TextField(verbose_name='Описание')
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     done = models.BooleanField(default=False)
+    user_agent = models.CharField(max_length=200, default="None")
+
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            self.title = self.description.split('\n')[0][:255]
+            self.description = "\n".join(self.description.split('\n')[1:])
+
+        super(Deadline, self).save(*args, **kwargs)
 
 
 class Tip(models.Model):

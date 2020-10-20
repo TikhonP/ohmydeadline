@@ -9,21 +9,20 @@ import datetime
 from secrets import token_hex
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.views.decorators.http import require_http_methods
+from django.contrib.auth.decorators import login_required
 
 
+@require_http_methods(["GET"])
 def main_page(request):
     if request.user.is_authenticated:
         return authed(request)
     else:
-        if request.method == 'GET':
-            return render(request, 'main.html', )
-        else:
-            return HttpResponse('Invalid requsest method ({}) Must be GET'.format(request.method))
+        return render(request, 'main.html', )
 
 
+@require_http_methods(["GET", "POST"])
 def loginp(request):
-    if request.user.is_authenticated:
-        return authed(request)
     if request.method == 'POST':
         form = LoginForm(request.POST)
         if form.is_valid():
@@ -39,14 +38,11 @@ def loginp(request):
                 messages.error(request, 'Неправильный логин или пароль!')
     elif request.method == 'GET':
         form = LoginForm()
-    else:
-        return HttpResponse('Invalid requsest method ({}) Must be GET or POST'.format(request.method))
     return render(request, 'login.html', {'form': form})
 
 
+@require_http_methods(["GET", "POST"])
 def registerp(request):
-    if request.user.is_authenticated:
-        return authed(request)
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
@@ -64,134 +60,116 @@ def registerp(request):
                         request, 'Логин уже существует! Придумайте новый, проявите фантазию!')
     elif request.method == 'GET':
         form = RegisterForm()
-    else:
-        return HttpResponse('Invalid requsest method ({}) Must be GET or POST'.format(request.method))
     return render(request, 'register.html', {'form': form})
 
 
+@login_required
+@require_http_methods(["GET", "POST"])
 def authed(request):
-    if request.method == 'GET':
-        mydeadlines = Deadline.objects.filter(user=request.user).order_by("-date_deadline")
-        nowtime = timezone.now()
+    mydeadlines = Deadline.objects.filter(user=request.user).order_by("-date_deadline")
+    nowtime = timezone.now()
 
-        for i in range(len(mydeadlines)):
-            mydeadlines[i].is_timeout = (mydeadlines[i].date_deadline - nowtime).total_seconds() <= 0
-
-
-        deadlines_for_tomorrow = Deadline.objects.filter(
-            user=request.user, done=False, date_deadline=(nowtime + datetime.timedelta(days=1)).date(),
-        ).order_by("date_deadline")
-
-        tips = Tip.objects.filter(user=request.user, is_active=True)
-
-        params = {
-            'user': request.user,
-            'mydeadlines': mydeadlines,
-            'len_mydeadlines': len(mydeadlines),
-            'nowtime': nowtime,
-            'deadlines_for_tomorrow': deadlines_for_tomorrow,
-            'len_deadlines_for_tomorrow': len(deadlines_for_tomorrow),
-            'tips': tips,
-        }
-
-        return render(request, 'authed.html', params)
-
-    else:
-        return HttpResponse('Invalid requsest method ({}) Must be GET or POST'.format(request.method))
+    for i in range(len(mydeadlines)):
+        mydeadlines[i].is_timeout = (mydeadlines[i].date_deadline - nowtime).total_seconds() <= 0
 
 
+    deadlines_for_tomorrow = Deadline.objects.filter(
+        user=request.user, done=False, date_deadline=(nowtime + datetime.timedelta(days=1)).date(),
+    ).order_by("date_deadline")
+
+    tips = Tip.objects.filter(user=request.user, is_active=True)
+
+    params = {
+        'user': request.user,
+        'mydeadlines': mydeadlines,
+        'len_mydeadlines': len(mydeadlines),
+        'nowtime': nowtime,
+        'deadlines_for_tomorrow': deadlines_for_tomorrow,
+        'len_deadlines_for_tomorrow': len(deadlines_for_tomorrow),
+        'tips': tips,
+    }
+
+    return render(request, 'authed.html', params)
+
+
+@login_required
+@require_http_methods(["GET"])
 def logoutp(request):
-    if request.method == 'GET':
-        logout(request)
-        return redirect('/')
-    else:
-        return HttpResponse('Invalid requsest method ({}) Must be GET'.format(request.method))
+    logout(request)
+    return redirect('/')
 
 
+@login_required
+@require_http_methods(["GET", "POST"])
 def adddeadline(request):
-    if not request.user.is_authenticated:
-        return redirect('/')
     if request.method == 'POST':
         form = DeadlineForm(request.POST)
         if form.is_valid():
             deadline = form.save(commit=False)
-            deadline.title = deadline.description.split('\n')[0][:255]
-            deadline.description = "\n".join(deadline.description.split('\n')[1:])
             deadline.user = request.user
+            deadline.user_agent = request.META['HTTP_USER_AGENT']
             deadline.save()
             return redirect('/')
     elif request.method == 'GET':
         form = DeadlineForm()
-    else:
-        return HttpResponse('Invalid requsest method ({}) Must be GET or POST'.format(request.method))
     return render(request, 'adddeadline.html', {'form': form})
 
 
+@login_required
+@require_http_methods(["GET"])
 def done_task(request):
-    if not request.user.is_authenticated:
-        return redirect('/')
-    if request.method == 'GET':
-        deadline_id = request.GET.get('deadline', None)
+    deadline_id = request.GET.get('deadline', None)
 
-        deadline = Deadline.objects.get(id=deadline_id)
+    deadline = Deadline.objects.get(id=deadline_id)
 
-        if deadline.user != request.user:
-            return HttpResponse('Access denied, this deadline is not associated with authed user')
+    if deadline.user != request.user:
+        return HttpResponse('Access denied, this deadline is not associated with authed user')
 
-        deadline.done = True
-        deadline.save()
+    deadline.done = True
+    deadline.save()
 
-        return redirect('/')
-    else:
-        return HttpResponse('Invalid requsest method ({}) Must be GET or POST'.format(request.method))
+    return redirect('/')
 
 
+@login_required
+@require_http_methods(["GET"])
 def all_tasks(request):
-    if not request.user.is_authenticated:
-        return redirect('/')
-    if request.method == 'GET':
-        tasks = Deadline.objects.filter(user=request.user).order_by("-date_deadline")
-        nowtime = timezone.now()
+    tasks = Deadline.objects.filter(user=request.user).order_by("-date_deadline")
+    nowtime = timezone.now()
 
-        for i in range(len(tasks)):
-            tasks[i].is_timeout = (tasks[i].date_deadline - nowtime).total_seconds() <= 0
+    for i in range(len(tasks)):
+        tasks[i].is_timeout = (tasks[i].date_deadline - nowtime).total_seconds() <= 0
 
-        params = {
-            'user': request.user,
-            'tasks': tasks,
-            'len_tasks': len(tasks),
-        }
+    params = {
+        'user': request.user,
+        'tasks': tasks,
+        'len_tasks': len(tasks),
+    }
 
-        return render(request, 'all_tasks.html', params)
-
-    else:
-        return HttpResponse('Invalid requsest method ({}) Must be GET or POST'.format(request.method))
+    return render(request, 'all_tasks.html', params)
 
 
+@login_required
+@require_http_methods(["POST"])
 def unpin_tip(request):
-    if not request.user.is_authenticated:
-        return redirect('/')
-    if request.method == 'POST':
-        tip_id = request.POST.get('id', None)
+    tip_id = request.POST.get('id', None)
 
-        tip = Tip.objects.get(id=tip_id)
+    tip = Tip.objects.get(id=tip_id)
 
-        print(tip.user, request.user)
+    print(tip.user, request.user)
 
-        if tip.user != request.user:
-            return HttpResponse('Hey hacker, it is not your tip!')
+    if tip.user != request.user:
+        return HttpResponse('Hey hacker, it is not your tip!')
 
-        tip.is_active = False
-        tip.save()
+    tip.is_active = False
+    tip.save()
 
-        return redirect('/')
+    return redirect('/')
 
-    else:
-        return HttpResponse('Invalid requsest method ({}) Must be POST'.format(request.method))
 
+@login_required
+@require_http_methods(["GET", "POST"])
 def add_tip(request):
-    if not request.user.is_authenticated:
-        return redirect('/')
     if request.method == 'POST':
         form = TipForm(request.POST)
         if form.is_valid():
@@ -201,14 +179,12 @@ def add_tip(request):
             return redirect('/')
     elif request.method == 'GET':
         form = TipForm()
-    else:
-        return HttpResponse('Invalid requsest method ({}) Must be GET or POST'.format(request.method))
     return render(request, 'addtip.html', {'form': form})
 
 
+@login_required
+@require_http_methods(["GET", "POST"])
 def profilep(request):
-    if not request.user.is_authenticated:
-        return redirect('/')
     if request.method == 'POST':
         form = UserForm(request.POST, instance=request.user)
         if form.is_valid():
@@ -216,8 +192,6 @@ def profilep(request):
             return redirect('/profile/')
     elif request.method == 'GET':
         form = UserForm(instance=request.user)
-    else:
-        return HttpResponse('Invalid requsest method ({}) Must be GET or POST'.format(request.method))
 
     params = {'form': form, 'bot_name': settings.BOT_NAME}
 
@@ -235,21 +209,19 @@ def profilep(request):
     return render(request, 'profile.html', params)
 
 
+@login_required
+@require_http_methods(["GET"])
 def unpin_telegram(request):
-    if not request.user.is_authenticated:
-        return redirect('/')
+    user_id = request.GET.get('id', None)
+    user = User.objects.get(id=user_id)
 
-    if request.method == 'GET':
-        user_id = request.GET.get('id', None)
-        user = User.objects.get(id=user_id)
+    p = user.profile
+    p.is_telegram_connected = False
+    p.save()
 
-        p = user.profile
-        p.is_telegram_connected = False
-        p.save()
-
-        return redirect('/profile')
-
-    else:
-        return HttpResponse('Invalid requsest method ({}) Must be GET'.format(request.method))
+    return redirect('/profile')
 
 
+@require_http_methods(["GET"])
+def privacy_policy(request):
+    return render(request, 'privacy.html')

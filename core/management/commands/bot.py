@@ -7,8 +7,7 @@ from telegram.ext import CommandHandler
 from telegram.utils.request import Request
 import telegram
 
-from core.models import Deadline, Tip, Profile
-from django.contrib.auth.models import User
+from core.models import Deadline, Profile
 
 import datetime
 from django.utils import timezone
@@ -38,7 +37,7 @@ def start(update, context):
 - Отвязать аккаунт /logout
 
 Каждые 24 часа бот будет присылать тебе список задач на завтра.
-                    """.format(profile.user.first_name)
+""".format(profile.user.first_name)
         else:
             reply = "Какая-то ошибка, я не знаю кто ты..."
     else:
@@ -48,14 +47,14 @@ def start(update, context):
         )) != 0:
             reply = "Ты уже подключен!"
         else:
-            reply = "Пожалуйста, залогинься через ссылку на сайте."
+            reply = "Пожалуйста, залогинься через ссылку на сайте. \nhttps://ohmydeadlines.ru/"
     context.bot.send_message(chat_id=update.effective_chat.id, text=reply)
 
 
 def showlist_for_tomorrow(update, context):
     user = Profile.objects.get(telegram_id=update.message.from_user.id).user if len(Profile.objects.filter(telegram_id=update.message.from_user.id, is_telegram_connected=True))!=0 else None
     if user is None:
-        reply = "Пожалуйста, залогинься через ссылку на сайте."
+        reply = "Пожалуйста, залогинься через ссылку на сайте. \nhttps://ohmydeadlines.ru/"
     else:
         nowtime = timezone.now()
 
@@ -83,7 +82,7 @@ def showlist_for_tomorrow(update, context):
 def showlist_of_all_active_tasks(update, context):
     user = Profile.objects.get(telegram_id=update.message.from_user.id).user if len(Profile.objects.filter(telegram_id=update.message.from_user.id, is_telegram_connected=True))!=0 else None
     if user is None:
-        reply = "Пожалуйста, залогинься через ссылку на сайте."
+        reply = "Пожалуйста, залогинься через ссылку на сайте. \nhttps://ohmydeadlines.ru/"
     else:
         mydeadlines = Deadline.objects.filter(user=user).order_by("-date_deadline")
 
@@ -111,7 +110,7 @@ def showlist_of_all_active_tasks(update, context):
 def logout(update, context):
     user = Profile.objects.get(telegram_id=update.message.from_user.id).user if len(Profile.objects.filter(telegram_id=update.message.from_user.id, is_telegram_connected=True))!=0 else None
     if user is None:
-        reply = "Пожалуйста, залогинься через ссылку на сайте."
+        reply = "Пожалуйста, залогинься через ссылку на сайте. \nhttps://ohmydeadlines.ru/"
     else:
         p = user.profile
         p.is_telegram_connected  = False

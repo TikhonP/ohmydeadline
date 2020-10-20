@@ -14,4 +14,5 @@ urlpatterns = [
     path('addtip/', views.add_tip, name='add_tip'),
     path('profile/', views.profilep, name='profile'),
     path('profile/delete_telegram/', views.unpin_telegram, name='delete_telegram'),
+    path('privacy/', views.privacy_policy, name='privacy'),
 ]

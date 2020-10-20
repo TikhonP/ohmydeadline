@@ -99,12 +99,22 @@
           {% endif %} {% endfor %}
         </div>
         <br />
-        <a href="/all_tasks"
-          ><button class="fluid ui button">Все задачи</button></a
-        >
+        <a href="/all_tasks">
+          <button class="fluid ui button">Все задачи</button>
+        </a>
       </div>
     </div>
   </div>
 </div>
 
+{% endblock %}
+
+{% block footer %}
+{% if user.is_staff  %}
+<div class="column">
+  <div class="two ui inverted link list">
+    <a href="/admin/" class="item">Администрирование</a>
+  </div>
+</div>
+{% endif %}
 {% endblock %}
