@@ -1,0 +1,13 @@
+User-Agent: *
+Allow: /
+Disallow: /login
+Disallow: /register
+Disallow: /profile/*
+Disallow: /logout
+Disallow: /adddeadline
+Disallow: /donedeadline
+Disallow: /all_tasks
+Disallow: /unpin
+Disallow: /addtip
+Disallow: /api/v1/*
+Disallow: /o/*
