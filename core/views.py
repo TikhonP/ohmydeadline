@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.http import HttpResponse
 from django.contrib.auth import authenticate, login, logout
-from .forms import LoginForm, RegisterForm, DeadlineForm, TipForm, UserForm
+from core.forms import SignupForm, DeadlineForm, TipForm, UserForm
 from core.models import Deadline, Tip
 from django.utils import timezone
 import datetime
@@ -10,7 +10,24 @@ from secrets import token_hex
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.views.decorators.http import require_http_methods
-from django.contrib.auth.decorators import login_required
+from account.decorators import login_required
+from django.contrib.auth.forms import AuthenticationForm
+import account.views
+import account.forms
+
+
+class SignupView(account.views.SignupView):
+    form_class = SignupForm
+    identifier_field = 'email'
+
+    def generate_username(self, form):
+        username = form.cleaned_data['email'].lower()
+        return username
+
+
+class LoginView(account.views.LoginView):
+
+    form_class = account.forms.LoginEmailForm
 
 
 @require_http_methods(["GET"])
@@ -23,47 +40,111 @@ def main_page(request):
 
 @require_http_methods(["GET", "POST"])
 def loginp(request):
+    redirect_path = request.GET.get('redirect_uri', '/')
+    if request.user.is_authenticated:
+        return redirect(redirect_path)
+
     if request.method == 'POST':
-        form = LoginForm(request.POST)
+        form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
-            cd = form.cleaned_data
-            user = authenticate(username=cd['username'], password=cd['password'])
-            if user is not None:
-                if user.is_active:
-                    login(request, user)
-                    return redirect('/')
-                else:
-                    messages.error(request, "Неактивный аккаунт")
-            else:
-                messages.error(request, 'Неправильный логин или пароль!')
-    elif request.method == 'GET':
-        form = LoginForm()
-    return render(request, 'login.html', {'form': form})
+            login(request, form.user_cache)
+            print(redirect_path)
+            return redirect(redirect_path)
+    else:
+        form = AuthenticationForm(request)
+
+    return render(request, 'auth/login.html', {
+        'form': form,
+        'redirect_path': redirect_path if redirect_path!='/' else False,
+    })
+
+
+@require_http_methods(["GET", "POST"])
+def activate(request, uidb64, token):
+    try:
+        uid = force_text(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except(TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+    if user is not None and account_activation_token.check_token(user, token):
+        user.is_active = True
+        user.save()
+        login(request, user)
+
+        messages.info(request, 'Спасибо за подтверждение аккаунта. Теперь вы можете пользоваться сервисом.')
+        return authed(request)
+    else:
+        message.error(request, "Неверная ссылка")
+        return render(request, 'auth/message.html')
 
 
 @require_http_methods(["GET", "POST"])
 def registerp(request):
+    redirect_path = request.GET.get('redirect_uri', '/')
+    if request.user.is_authenticated:
+        return redirect(redirect_path)
+
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
-            cd = form.cleaned_data
-            if cd['password']!=cd['password1']:
-                messages.error(request, 'Пароли не совпадают! Проверьте правильность ввода паролей или придумайте новые.')
-            else:
-                user = authenticate(username=cd['username'], password=cd['password'])
-                if not user:
-                    user = form.save()
-                    login(request, user)
-                    return redirect('/')
-                else:
-                    messages.error(
-                        request, 'Логин уже существует! Придумайте новый, проявите фантазию!')
+            user = form.save(commit=False)
+            user.is_active = False
+            user.save()
+
+            current_site = get_current_site(request)
+
+            mail_subject = 'Активируйте аккаунт "ohmydeadlines"'
+            message = render_to_string('auth/confirm_email.html', {
+                'user': user,
+                'domain': current_site.domain,
+                'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+                'token': account_activation_token.make_token(user),
+            })
+            # to_email = form.cleaned_data.get('email')
+            # email = EmailMessage(
+            #     mail_subject, message, to=[to_email]
+            # )
+            # email.send()
+
+            message.info(request, "Пожалуйста подвердите аккаунт, перейдя по ссылке в письме на указанной почте.")
+            print("=="*10+"\n"+message+"\n")
+            return render(request, 'auth/message.html')
+
     elif request.method == 'GET':
         form = RegisterForm()
-    return render(request, 'register.html', {'form': form})
+    return render(request, 'auth/register.html', {
+        'form': form,
+        'redirect_path': redirect_path if redirect_path!='/' else False,
+    })
 
 
-@login_required
+'''
+@require_http_methods(["GET", "POST"])
+def registerp(request):
+    redirect_path = request.GET.get('redirect_uri', '/')
+    if request.user.is_authenticated:
+        return redirect(redirect_path)
+
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password1')
+            user = authenticate(username=username, password=password)
+            login(request, user)
+            return redirect(redirect_path)
+    elif request.method == 'GET':
+        form = UserCreationForm()
+    return render(request, 'register.html', {
+        'form': form,
+        'redirect_path': redirect_path if redirect_path!='/' else False,
+    })
+'''
+
+
+
+@login_required(redirect_field_name='redirect_uri')
 @require_http_methods(["GET", "POST"])
 def authed(request):
     mydeadlines = Deadline.objects.filter(user=request.user).order_by("-date_deadline")
@@ -89,17 +170,17 @@ def authed(request):
         'tips': tips,
     }
 
-    return render(request, 'authed.html', params)
+    return render(request, 'authed/authed.html', params)
 
 
-@login_required
+@login_required(redirect_field_name='redirect_uri')
 @require_http_methods(["GET"])
 def logoutp(request):
     logout(request)
     return redirect('/')
 
 
-@login_required
+@login_required(redirect_field_name='redirect_uri')
 @require_http_methods(["GET", "POST"])
 def adddeadline(request):
     if request.method == 'POST':
@@ -112,10 +193,10 @@ def adddeadline(request):
             return redirect('/')
     elif request.method == 'GET':
         form = DeadlineForm()
-    return render(request, 'adddeadline.html', {'form': form})
+    return render(request, 'authed/adddeadline.html', {'form': form})
 
 
-@login_required
+@login_required(redirect_field_name='redirect_uri')
 @require_http_methods(["GET"])
 def done_task(request):
     deadline_id = request.GET.get('deadline', None)
@@ -131,7 +212,7 @@ def done_task(request):
     return redirect('/')
 
 
-@login_required
+@login_required(redirect_field_name='redirect_uri')
 @require_http_methods(["GET"])
 def all_tasks(request):
     tasks = Deadline.objects.filter(user=request.user).order_by("-date_deadline")
@@ -146,10 +227,10 @@ def all_tasks(request):
         'len_tasks': len(tasks),
     }
 
-    return render(request, 'all_tasks.html', params)
+    return render(request, 'authed/all_tasks.html', params)
 
 
-@login_required
+@login_required(redirect_field_name='redirect_uri')
 @require_http_methods(["POST"])
 def unpin_tip(request):
     tip_id = request.POST.get('id', None)
@@ -167,7 +248,7 @@ def unpin_tip(request):
     return redirect('/')
 
 
-@login_required
+@login_required(redirect_field_name='redirect_uri')
 @require_http_methods(["GET", "POST"])
 def add_tip(request):
     if request.method == 'POST':
@@ -179,10 +260,10 @@ def add_tip(request):
             return redirect('/')
     elif request.method == 'GET':
         form = TipForm()
-    return render(request, 'addtip.html', {'form': form})
+    return render(request, 'authed/addtip.html', {'form': form})
 
 
-@login_required
+@login_required(redirect_field_name='redirect_uri')
 @require_http_methods(["GET", "POST"])
 def profilep(request):
     if request.method == 'POST':
@@ -206,10 +287,10 @@ def profilep(request):
         request.user.profile.save()
         params['telegram_hash'] = request.user.profile.telegram_hash
 
-    return render(request, 'profile.html', params)
+    return render(request, 'auth/profile.html', params)
 
 
-@login_required
+@login_required(redirect_field_name='redirect_uri')
 @require_http_methods(["GET"])
 def unpin_telegram(request):
     user_id = request.GET.get('id', None)
@@ -224,4 +305,4 @@ def unpin_telegram(request):
 
 @require_http_methods(["GET"])
 def privacy_policy(request):
-    return render(request, 'privacy.html')
+    return render(request, 'static_templates/privacy.html')

@@ -15,4 +15,6 @@ urlpatterns = [
     path('profile/', views.profilep, name='profile'),
     path('profile/delete_telegram/', views.unpin_telegram, name='delete_telegram'),
     path('privacy/', views.privacy_policy, name='privacy'),
+    path('activate/<uuid:uidb64>/<str:token>/',
+        views.activate, name='activate')
 ]

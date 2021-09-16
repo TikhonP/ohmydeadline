@@ -35,8 +35,9 @@ class Deadline(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.pk:
-            self.title = self.description.split('\n')[0][:255]
-            self.description = "\n".join(self.description.split('\n')[1:])
+            if self.title is None:
+                self.title = self.description.split('\n')[0][:255]
+                self.description = "\n".join(self.description.split('\n')[1:])
 
         super(Deadline, self).save(*args, **kwargs)
 

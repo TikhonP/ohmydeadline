@@ -13,7 +13,7 @@ class DeadlineSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Deadline
-        fields = ('date_deadline', 'working_time', 'description',)
+        fields = ('title', 'date_deadline', 'working_time', 'description',)
 
 
 class ProfileSerializer(serializers.ModelSerializer):
